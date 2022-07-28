@@ -1,0 +1,16 @@
+{
+  "name": "petrav2",
+  "version": "1.0.0",
+  "description": "Bot para discord chistoso",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js"
+  },
+  "author": "rolegio",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^13.8.1",
+    "dotenv": "^16.0.1"
+  },
+  "type" : "module"
+}
