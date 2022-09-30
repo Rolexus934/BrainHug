@@ -1,8 +1,11 @@
-import{amogus} from './amongif.js';
+import { amogus } from './amongif.js';
+import { help } from './help.js';
+
 
 const commands = {
-    amongif : amogus
+    amongif: amogus,
+    help: help,
 }
 
-export {commands}
+export { commands }
 

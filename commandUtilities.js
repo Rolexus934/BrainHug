@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
-const { MessageAttachment } = require("discord.js");
+const { AttachmentBuilder } = require("discord.js");
 
 class Command {
   constructor(path, nArgs, commandName) {
@@ -23,7 +23,7 @@ class SourceCommand extends Command {
   createAttachment = (rand = true, num = 0) => {
     if ((rand = true)) num = this.#random(this.numSourceFiles, 1);
 
-    return new MessageAttachment(`cmds/src/amongif/${num}.gif`);
+    return new AttachmentBuilder(`cmds/src/amongif/${num}.gif`);
   };
 
   //private methods

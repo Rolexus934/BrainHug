@@ -9,8 +9,8 @@
   "author": "rolegio",
   "license": "ISC",
   "dependencies": {
-    "discord.js": "^13.8.1",
+    "discord.js": "^14.3.0",
     "dotenv": "^16.0.1"
   },
-  "type" : "module"
+  "type": "module"
 }
