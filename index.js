@@ -6,7 +6,7 @@ const require = createRequire(import.meta.url);
 
 const fs = require("fs");
 
-let petraUtil = new commandUtil("$petra");
+let brainHugUtil = new commandUtil("$brainhug");
 
 require("dotenv").config();
 
@@ -26,8 +26,8 @@ client.once("ready", () => {
   console.log(`Logged in as ${client.user.tag}`);
 });
 client.on("messageCreate", async (message) => {
-  if (message.content.startsWith(petraUtil.baseKeyword)) {
-    const { command, args } = petraUtil.commParser(message.content);
+  if (message.content.startsWith(brainHugUtil.baseKeyword)) {
+    const { command, args } = brainHugUtil.commParser(message.content);
 
     if (commands[command] != undefined) {
       console.dir(commands[command]);

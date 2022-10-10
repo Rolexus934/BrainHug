@@ -7,8 +7,8 @@ const helpEmbed = new EmbedBuilder()
     .setColor(0x0099FF)
     .setTitle('Welcome to the Brainhug Bot!')
     .setURL('https://discord.js.org/')
-    .setAuthor({ name: 'Some name', iconURL: 'https://i.imgur.com/AfFp7pu.png', url: 'https://discord.js.org' })
-    .setDescription('A Javascript based discord bot, where you can compile Brainf*ck code directly from a message!')
+    .setAuthor({ name: 'Rolegio934', iconURL: 'https://i.imgur.com/AfFp7pu.png', url: 'https://discord.js.org' })
+    .setDescription('A Javascript based discord bot, where you can compile Brainf*ck code directly from a message sent on your server!')
     .setThumbnail('https://i.imgur.com/AfFp7pu.png')
     .addFields(
         { name: 'Regular field title', value: 'Some value here' },
