@@ -2,11 +2,20 @@ import {Command} from "../commandUtilities.js";
 import {createRequire} from "module";
 import { channel } from "diagnostics_channel";
 const require = createRequire(import.meta.url);
+const {EmbedBuilder} = require('discord.js')
 const compile = new Command (
     'cmds/help.js' , 2 , 'compile'
 )
 
-
+const inputEmbed = new EmbedBuilder()
+    .setColor(0x0099FF)
+    .setTitle('Input Mode')
+    .setDescription("Your program Requires an input! \nYou can input a *Number* or a *Single Character*, otherwise you'll get a Runtime error\n.")
+    .addFields(
+        { name: 'How2Exit input mode?', value:  "Input .exit if you want to finish the program execution"},
+    )
+    .setTimestamp()
+    .setFooter({ text: 'BrainHugBot', iconURL: 'https://i.imgur.com/AfFp7pu.png' });
 
 const run = async (code,message,flags) => {
     console.log('initializing compilation');
@@ -96,7 +105,7 @@ const run = async (code,message,flags) => {
                 }
                 break;
             case ',':
-                channel.send("Your program Requires an input! \nYou can input a Number or a Single Character, otherwise you'll get a Runtime error\nInput .exit if you want to finish the program execution).")
+                channel.send({embeds: [inputEmbed]})
                 console.log(`Input at byte ${ptr}`);
                 try{
                     let promise = await channel.awaitMessages({filter,max:1,time: 10000, errors:['time']});
@@ -121,7 +130,6 @@ const run = async (code,message,flags) => {
                 }
                 catch(e){
                     //console.log(e);
-                    channel.send("Time limit exceeded!");
                     compilingResults['state'] = 'Runtime Error';
                     compilingResults['info'] = 'The 10 second limit for sending your input was exceeded.';
 
@@ -154,10 +162,11 @@ const run = async (code,message,flags) => {
 
 compile.trigger = async (message, code , rawFlags, extra = []) => {
     let channel =message.channel;
-    if(rawFlags.length) {
-        const compilingFlags = rawFlags.slice(",");
+    let compilingFlags = [];
+    if(rawFlags !== undefined) {
+        compilingFlags = rawFlags.slice(",");
     }
-    let n = compilingFlags[0];
+
     
     console.log(code);
     let compilingResults = null;
@@ -169,8 +178,24 @@ compile.trigger = async (message, code , rawFlags, extra = []) => {
     
     console.log('finished');
     console.log(compilingResults);
+    let color = 0xC70039; 
+    if(compilingResults['state'] === 'Successful'){
+        color = 0xAAFF00;
+    }
     
-    channel.send(`${compilingResults['info']}\n Output: ${compilingResults['output']} \n Execution time: ${compilingResults['time']} `);S
+    const compilingResultsEmbed = new EmbedBuilder()
+    .setColor(color)
+    .setTitle(compilingResults['state'])
+    .setDescription(compilingResults['info'])
+    .addFields(
+        { name: 'Output', value:  compilingResults['output']},
+        { name: 'Execution Time', value: `${compilingResults['time']}`, inline: true },
+        { name: 'State', value: compilingResults['state'], inline: true },
+    )
+    .setTimestamp()
+    .setFooter({ text: 'BrainHugBot', iconURL: 'https://i.imgur.com/AfFp7pu.png' });
+    channel.send({embeds: [compilingResultsEmbed]});
+
 
 }
 
