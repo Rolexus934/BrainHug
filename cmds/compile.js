@@ -12,20 +12,54 @@ const run = async (code,message,flags) => {
     console.log('initializing compilation');
     const channel = message.channel;
 
-    const compilingResults = {state: 'Succesfull', info: "The execution of the program was successful and 0 errors were found"};
+    const compilingResults = {state: 'Successful', info: "The execution of the program was successful and 0 errors were found"};
 
+    //Verifying that every '[' loop has its closing bracket ']'
+    const bracketStack = []
+    //Creating 2 hashmaps for saving the positions of the brackets
+
+    //returns the closing bracket position
+    const mapClosing = new Map();
+    //returns the opening bracket position
+    const mapOpening = new Map();
+    for(let x = 0; x<code.length;x++) {
+        if(code[x] === '['){
+            bracketStack.push(x);
+        }
+        if(code[x] === ']'){
+            if(bracketStack.length!=0){
+                const bracketFirst = bracketStack.pop();
+                mapClosing.set(bracketFirst,x);
+                mapOpening.set(x,bracketFirst);
+            }
+            else{
+                compilingResults['state'] = 'Compiling Error';
+                compilingResults['info'] = `Expected '[' before the closing bracket at position ${x}\n `;
+                break;
+            }
+        }
+    }
+    if(bracketStack.length!=0){
+        compilingResults['state'] = 'Compiling Error';
+        compilingResults['info'] = `Expected '[' to match the closing bracket at position ${bracketStack.pop()}`;
+    }
+
+    //initializing memory, pointers, the output array and the loopStack
     let ptr = 0;
     let memory = Array(100000).fill(0);
-    //we use a stack to keep track of every loop inside of the code
-    let loopStack = []
     let output = []
+    let i = 0;
+
+    //filter for the input mode
     const filter = m => {
         console.dir(m)
         return m.author==message.author;
     };
-    let i = 0;
-    let nloops = 0;
-    while(i<code.length){
+    
+
+
+
+    while(i<code.length && compilingResults['state'] === 'Successful'){
         if(ptr<0){
             compilingResults['state'] = 'Runtime ERROR';
             compilingResults['info'] = 'Pointer position out of range';
@@ -47,18 +81,17 @@ const run = async (code,message,flags) => {
                 console.log(`byte at position ${ptr} --`);
                 memory[ptr]--;
                 break;
-            // case '[':
-            //     if(memory[ptr]{
-
-            //     }
-            //     else{
-                    
-            //     }
-                
-            //     break;
-            // case ']':
-            //     break;
-            case '.':
+            case '[':
+                 if(memory[ptr]==0){
+                    i = mapClosing.get(i);
+                 }             
+                 break;
+             case ']':
+                if(memory[ptr]!=0){
+                    i = mapOpening.get(i)
+                }
+                break;
+            case ',':
                 channel.send("Your program Requires an input! \nYou can input a Number or a Single Character, otherwise you'll get a Runtime error\nInput .exit if you want to finish the program execution).")
                 console.log(`Input at byte ${ptr}`);
                 try{
@@ -68,17 +101,18 @@ const run = async (code,message,flags) => {
                         channel.send("Finishing Program Execution!");
                         compilingResults['state'] = 'Stopped';
                         compilingResults['info'] = 'The user has stopped the program execution';
-                        return compilingResults;
                     }
-                    if(value.length > 1 && parseInt(value)==undefined){
+                    else if(value.length > 1 && Number.isNaN(parseInt(value))){
                         channel.send("Sorry, you can only input a single Character or a Number. Try Compiling Again");
                         compilingResults['state'] = 'Runtime Error';
                         compilingResults['info'] = 'Invalid Input.';
-                        return compilingResults;
                     }
-                    console.log(parseInt(value));
-                    if(Number.isNaN(parseInt(value))) value = value.charCodeAt(0);
-                    memory[ptr] = parseInt(value);
+                    else{
+                        console.log(parseInt(value));
+                        if(Number.isNaN(parseInt(value))) value = value.charCodeAt(0);
+                        memory[ptr] = parseInt(value);
+                    }
+                    
 
                 }
                 catch(e){
@@ -89,7 +123,7 @@ const run = async (code,message,flags) => {
 
                 }
                 break;
-            case ',':
+            case '.':
                 console.log(`output byte at position ${ptr}`);
                 output.push(memory[ptr]);
                 break;
@@ -99,8 +133,9 @@ const run = async (code,message,flags) => {
         i++;
 
     }
+    console.log(output);
 
-    if(compilingResults['state']==="Succesfull"){
+    if(compilingResults['state']==="Successful"){
         compilingResults['output'] = output.toString();
     }
 
@@ -111,8 +146,7 @@ const run = async (code,message,flags) => {
 
 
 
-//     return compilingResults;
-// }
+
 compile.trigger = async (message, code , rawFlags, extra = []) => {
     let channel =message.channel;
     const compilingFlags = rawFlags.slice(",");
