@@ -10,7 +10,7 @@ const compile = new Command (
 const inputEmbed = new EmbedBuilder()
     .setColor(0x0099FF)
     .setTitle('Input Mode')
-    .setDescription("Your program Requires an input! \nYou can input a *Number* or a *Single Character*, otherwise you'll get a Runtime error\n.")
+    .setDescription("Your program Requires an input! \nYou can input a *Number* or a *Single Character*, otherwise you'll get a Runtime error.\n")
     .addFields(
         { name: 'How2Exit input mode?', value:  "Input .exit if you want to finish the program execution"},
     )
@@ -18,6 +18,7 @@ const inputEmbed = new EmbedBuilder()
     .setFooter({ text: 'BrainHugBot', iconURL: 'https://i.imgur.com/AfFp7pu.png' });
 
 const run = async (code,message,flags) => {
+
     console.log('initializing compilation');
     const channel = message.channel;
 
@@ -136,8 +137,11 @@ const run = async (code,message,flags) => {
                 }
                 break;
             case '.':
-                //console.log(`output byte at position ${ptr}`);
-                output.push(memory[ptr]);
+                let val = memory[ptr];
+                if(flags[0] == "-a"){
+                    val = String.fromCharCode(val);
+                }
+                output.push(val);
                 break;
         }
         //console.log(i);
@@ -146,6 +150,8 @@ const run = async (code,message,flags) => {
 
     }
     console.log(output);
+
+    
 
     if(compilingResults['state']==="Successful"){
         compilingResults['time'] = (timeStamp - startTime)/1000;
@@ -164,7 +170,9 @@ compile.trigger = async (message, code , rawFlags, extra = []) => {
     let channel =message.channel;
     let compilingFlags = [];
     if(rawFlags !== undefined) {
-        compilingFlags = rawFlags.slice(",");
+        console.log('lol');
+        compilingFlags = rawFlags.split(",");
+        console.dir(compilingFlags);
     }
 
     
