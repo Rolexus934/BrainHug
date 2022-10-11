@@ -12,7 +12,7 @@ const run = async (code,message,flags) => {
     console.log('initializing compilation');
     const channel = message.channel;
 
-    const compilingResults = {state: 'Successful', info: "The execution of the program was successful and 0 errors were found"};
+    const compilingResults = {state: 'Successful', info: "The execution of the program was successful and 0 errors were found", output: "None", time: "None"};
 
     //Verifying that every '[' loop has its closing bracket ']'
     const bracketStack = []
@@ -43,6 +43,7 @@ const run = async (code,message,flags) => {
         compilingResults['state'] = 'Compiling Error';
         compilingResults['info'] = `Expected '[' to match the closing bracket at position ${bracketStack.pop()}`;
     }
+    
 
     //initializing memory, pointers, the output array and the loopStack
     let ptr = 0;
@@ -56,16 +57,19 @@ const run = async (code,message,flags) => {
         return m.author==message.author;
     };
     
-
-
-
+    //setting a timestamp 
+    const startTime = new Date().getTime();
+    let timeStamp =0;
     while(i<code.length && compilingResults['state'] === 'Successful'){
+        timeStamp = new Date().getTime()
+        if(timeStamp-startTime>10000){
+            compilingResults['state'] = 'Runtime ERROR';
+            compilingResults['info'] = "The runtime execution exceeded the 10 seconds default limit";
+        }
         if(ptr<0){
             compilingResults['state'] = 'Runtime ERROR';
             compilingResults['info'] = 'Pointer position out of range';
         }
-
-
         switch(code[i]){
             case '>':
                 ptr++;
@@ -74,11 +78,11 @@ const run = async (code,message,flags) => {
                 ptr--;
                 break;
             case '+':
-                console.log(`byte at position ${ptr} ++`);
+                //console.log(`byte at position ${ptr} ++`);
                 memory[ptr]++;
                 break;
             case '-':
-                console.log(`byte at position ${ptr} --`);
+                //console.log(`byte at position ${ptr} --`);
                 memory[ptr]--;
                 break;
             case '[':
@@ -116,7 +120,7 @@ const run = async (code,message,flags) => {
 
                 }
                 catch(e){
-                    console.log(e);
+                    //console.log(e);
                     channel.send("Time limit exceeded!");
                     compilingResults['state'] = 'Runtime Error';
                     compilingResults['info'] = 'The 10 second limit for sending your input was exceeded.';
@@ -124,11 +128,11 @@ const run = async (code,message,flags) => {
                 }
                 break;
             case '.':
-                console.log(`output byte at position ${ptr}`);
+                //console.log(`output byte at position ${ptr}`);
                 output.push(memory[ptr]);
                 break;
         }
-        console.log(i);
+        //console.log(i);
         //hehe
         i++;
 
@@ -136,6 +140,7 @@ const run = async (code,message,flags) => {
     console.log(output);
 
     if(compilingResults['state']==="Successful"){
+        compilingResults['time'] = (timeStamp - startTime)/1000;
         compilingResults['output'] = output.toString();
     }
 
@@ -149,7 +154,9 @@ const run = async (code,message,flags) => {
 
 compile.trigger = async (message, code , rawFlags, extra = []) => {
     let channel =message.channel;
-    const compilingFlags = rawFlags.slice(",");
+    if(rawFlags.length) {
+        const compilingFlags = rawFlags.slice(",");
+    }
     let n = compilingFlags[0];
     
     console.log(code);
@@ -162,7 +169,8 @@ compile.trigger = async (message, code , rawFlags, extra = []) => {
     
     console.log('finished');
     console.log(compilingResults);
-    channel.send(`${compilingResults['info']}\n Output: ${compilingResults['output']}`);
+    
+    channel.send(`${compilingResults['info']}\n Output: ${compilingResults['output']} \n Execution time: ${compilingResults['time']} `);S
 
 }
 
